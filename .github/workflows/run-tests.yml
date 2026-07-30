@@ -1,0 +1,54 @@
+name: PHPUnit Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - '1.x'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['8.2', '8.3', '8.4']
+        filament-versions: ['4.*', '5.*']
+
+    name: PHP ${{ matrix.php-versions }} · Filament ${{ matrix.filament-versions }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: dom, curl, libxml, mbstring, zip, intl, pdo, pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ matrix.php-versions }}-${{ matrix.filament-versions }}-${{ hashFiles('composer.json') }}
+          restore-keys: composer-${{ matrix.php-versions }}-${{ matrix.filament-versions }}-
+
+      - name: Pin the Filament version under test
+        run: |
+          composer require "filament/filament:${{ matrix.filament-versions }}" --dev --no-interaction --no-update
+          composer require "filament/tables:${{ matrix.filament-versions }}" --no-interaction --no-update
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests
+        run: vendor/bin/phpunit

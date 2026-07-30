@@ -1,0 +1,15 @@
+# Dependencies
+/vendor/
+
+# Package publication — the lock file is not committed for libraries
+composer.lock
+
+# Test artefacts
+.phpunit.result.cache
+.phpunit.cache
+/build
+
+# IDE
+.idea
+.vscode
+*.iml
