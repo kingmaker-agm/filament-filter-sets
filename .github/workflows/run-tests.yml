@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - master
       - '1.x'
   pull_request:
     branches:
